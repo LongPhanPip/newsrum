@@ -1,11 +1,8 @@
 from django.urls import path, include
-
-from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
-
-from accounts.views import RegisterView, LoginView, AccountView
+from accounts.views import AccountDetailView, AccountListView, AccountSearchView
 
 urlpatterns = [
-    path('login', LoginView.as_view()),
-    path('register', RegisterView.as_view()),
-    path('accounts/<username>', AccountView.as_view()),
+    path('', AccountListView.as_view()),
+    path('search', AccountSearchView.as_view()),
+    path('<pk>', AccountDetailView.as_view()),
 ]

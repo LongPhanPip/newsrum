@@ -2,55 +2,42 @@ from uuid import uuid4
 from django.db import models
 
 from accounts.models import Account
+from gernes.models import Gerne
+from publishers.models import Publisher
 
 
-USER_POST_STATUS = [
+POST_STATUS = [
     ('P', 'Pending'),
-    ('A', 'Accepted'),
-    ('H', 'Hidden')
+    ('A', 'Accept'),
+    ('H', 'Hidden'),
 ]
 
+
 def post_image_path(instance, filename):
-    return f'posts/{instance.id}/images/{filename}'
-
-def publisher_logo_path(instance, filename):
-    return f'publishers/{instance.name}/logo/{filename}'
+    return f'posts/{instance.post.id}/images/{filename}'
 
 
-class Gerne(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=64)
-    description = models.CharField(max_length=255, blank=True)
+def post_markdown_path(instance, filename):
+    return f'posts/{instance.id}/markdown/{filename}'
 
-    class Meta:
-        db_table = 'gerne'
-
-
-class Publisher(models.Model):
-    id = models.AutoField(primary_key=True)
-    url = models.URLField()
-    name = models.CharField(max_length=128)
-    logo = models.FileField(upload_to=publisher_logo_path)
-
-    class Meta:
-        db_table = 'publisher'
 
 class Post(models.Model):
-    id = models.AutoField(default=uuid4, primary_key=True)
-    title = models.CharField(max_length=128)
+    id = models.UUIDField(default=uuid4, primary_key=True)
+    title = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     description = models.CharField(max_length=255)
-    image = models.FileField(upload_to=post_image_path)
     gerne = models.ForeignKey(Gerne, on_delete=models.CASCADE, related_name="posts")
+    status = models.CharField(max_length=32, choices=POST_STATUS)
 
     class Meta:
         db_table = 'post'
 
+
 class UserPost(models.Model):
-    id = models.OneToOneField(Post, primary_key=True, on_delete=models.CASCADE, related_name="user_post")
+    post = models.OneToOneField(Post, primary_key=True, on_delete=models.CASCADE, related_name="user_post")
+    image = models.FileField(upload_to=post_image_path)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="posts")
     markdown = models.TextField()
-    status = models.CharField(max_length=64, choices=USER_POST_STATUS)
     updated_at = models.DateTimeField(auto_now_add=True, blank=True)
 
     class Meta:
@@ -58,10 +45,21 @@ class UserPost(models.Model):
 
 
 class WebPost(models.Model):
-    id = models.OneToOneField(Post, primary_key=True, on_delete=models.CASCADE, related_name="web_post")
-    url = models.URLField()
-    author = models.CharField(max_length=128)
+    post = models.OneToOneField(Post, primary_key=True, on_delete=models.CASCADE, related_name="web_post")
+    url = models.URLField(max_length=500)
+    image_url = models.URLField(max_length=500, blank=True)
+    author = models.CharField(max_length=128, blank=True)
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE, related_name='posts')
 
     class Meta:
         db_table = 'web_post'
+
+
+class PostClick(models.Model):
+    id = models.AutoField(primary_key=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="clicks", blank=True, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="clicks")
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)
+
+    class Meta:
+        db_table = 'post_click'

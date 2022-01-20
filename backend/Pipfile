@@ -18,6 +18,9 @@ djangorestframework-simplejwt = "*"
 markdown = "*"
 django-filter = "*"
 django-cors-headers = "*"
+beautifulsoup4 = "*"
+lxml = "*"
+torch = "*"
 
 [dev-packages]
 

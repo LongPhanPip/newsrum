@@ -51,8 +51,16 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # Local
+    'auths.apps.AuthsConfig',
     'accounts.apps.AccountsConfig',
+    'user.apps.UserConfig',
     'posts.apps.PostsConfig',
+    'gernes.apps.GernesConfig',
+    'publishers.apps.PublishersConfig',
+    'profiles.apps.ProfilesConfig',
+    'comments.apps.CommentsConfig',
+    'recommender.apps.RecommenderConfig',
+    'utils.apps.UtilsConfig',
 
 ]
 
@@ -60,16 +68,21 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
 }
 
-CORS_ORIGIN_WHITELIST = (
-    'http://localhost:3000',
-    'http://localhost:8000',
-)
+CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS_ORIGIN_WHITELIST = (
+#     'http://localhost:3000',
+#     'http://localhost:8000',
+#     '0.0.0.0'
+# )
 
 
 MIDDLEWARE = [
@@ -168,7 +181,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.Account'
 
 # Set allow not using append splash
-APPEND_SLASH=False
+APPEND_SLASH = False
 
 
 # Set file location
