@@ -5,8 +5,6 @@ from rest_framework import serializers
 from accounts.serializers import AccountSerializer
 from gernes.serializers import GerneSerializer
 from publishers.serializers import PublisherSerializer
-from gernes.controllers import get_gerne_by_id
-
 from .models import Post, Publisher, UserPost, WebPost, PostClick
 
 import logging
@@ -84,4 +82,4 @@ class PostClickSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PostClick
-        fields = ['id', 'post', 'account', 'post_id', 'created_at', 'account_id']
+        fields = ['id', 'post', 'account', 'post_id', 'created_at', 'account_id', 'is_recommended']

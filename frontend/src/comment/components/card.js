@@ -10,12 +10,10 @@ import CommentForm from './form';
 
 const CommentCard = (props) => {
   const comment = props.comment;
-
   const [replies, setReplies] = useState([]);
   const [displayReplyBox, setDisplayReplyBox] = useState(false);
   const [avatar, setAvatar] = useState(() => {
-    console.log(comment)
-    return get_profile_avatar(comment.account.id);
+    return get_profile_avatar(comment.account);
   });
 
   useEffect(() => {

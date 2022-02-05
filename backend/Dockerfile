@@ -6,9 +6,9 @@ ENV PYTHONUNBUFFERED 1
 # set working dir
 WORKDIR /backend
 
-COPY Pipfile Pipfile.lock /backend
+COPY requirements.txt /backend
 
-RUN pip install pipenv && pipenv install --system
+RUN pip install -r requirements.txt
 
 COPY . /backend
 

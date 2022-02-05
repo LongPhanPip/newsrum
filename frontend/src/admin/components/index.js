@@ -11,7 +11,13 @@ import AdminUser from './user';
 import AdminUserAccount from './account';
 import AdminUserPost from './user_post';
 
+import AdminRecommender from './recommender';
+import AdminTrainRecommender from './train';
+import AdminValidateRecommender from './validate';
+
 export {AdminWebPost, AdminPublisherFeed, AdminAddPost, AdminWebSearchPost};
 
 export {AdminSystem, AdminGerne, AdminPublisher};
 export {AdminUser, AdminUserAccount, AdminUserPost};
+
+export {AdminRecommender, AdminTrainRecommender, AdminValidateRecommender}

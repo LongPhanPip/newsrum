@@ -19,7 +19,7 @@ from permissions import IsAuthenticatedOrReadOnly, ReadOrPostOwner
 
 from .serializers import PostSerializer, UserPostSerializer, WebPostSerializer, PostClickSerializer
 
-from .controllers import get_all_posts, get_hot_posts, get_post_by_id, get_post_by_user, get_all_web_posts, get_all_user_posts, get_user_post_by_id, get_web_post_by_id, search_post, delete_post_by_id, search_web_post, search_user_post, create_post
+from .controls import PostControl
 
 
 logger = logging.getLogger(__name__)
@@ -27,13 +27,14 @@ logger = logging.getLogger(__name__)
 
 class PostListView(APIView, PaginationHandlerMixin):
     pagination_class = Pagination
+    control = PostControl()
 
     def get(self, request):
         sort = request.query_params.get('sort', '-created_at')
         status = "A"
-        posts = get_all_posts(sort=sort,
-                              filter=request.query_params.dict(),
-                              status=status)
+        posts = self.control.get_all_posts(sort=sort,
+                                           filter=request.query_params.dict(),
+                                           status=status)
 
         page = self.paginate_queryset(posts)
         serializer = PostSerializer(posts, many=True)
@@ -44,9 +45,10 @@ class PostListView(APIView, PaginationHandlerMixin):
 
 class PostDetailView(APIView):
     permission_classes = [ReadOrPostOwner]
+    control = PostControl()
 
     def get(self, request, pk):
-        post = get_post_by_id(pk)
+        post = self.control.get_post_by_id(pk)
         if getattr(post, "user_post", False):
             if post.status == "P" and not request.user.is_admin:
                 self.check_object_permissions(request, post.user_post.account)
@@ -56,30 +58,38 @@ class PostDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk):
-        post = get_post_by_id(pk)
-        serializer = PostSerializer(post, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer = self.control.update_post_by_id(pk, request.data)
         return Response(serializer.data)
 
     def delete(self, request, pk):
-        delete_post_by_id(pk)
+        self.control.delete_post_by_id(pk)
         return Response('Post was deleted successfully')
 
 
 
-class PostHotListView(APIView):
+class PostRecommendView(APIView):
+    control = PostControl()
+
     def get(self, request):
-        posts = get_hot_posts(request.query_params)
+        if not request.user.is_anonymous:
+            if not request.user.is_admin:
+                posts = self.control.get_recommend_posts(request.user, request.query_params)
+            else:
+                posts = self.control.get_hot_posts(request.query_params)
+
+        else:
+            posts = self.control.get_hot_posts(request.query_params)
+
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
 
 class PostSearchView(APIView, PaginationHandlerMixin):
     pagination_class = Pagination
+    control = PostControl()
 
     def get(self, request):
-        posts = search_post(request.query_params.dict())
+        posts = self.control.search_post(request.query_params.dict())
         page = self.paginate_queryset(posts)
         serializer = WebPostSerializer(posts, many=True)
         if page is not None:
@@ -91,9 +101,10 @@ class PostSearchView(APIView, PaginationHandlerMixin):
 class WebPostListView(APIView, PaginationHandlerMixin):
     pagination_class = Pagination
     permission_classes = [IsAdminUser]
+    control = PostControl()
 
     def get(self, request):
-        posts = get_all_web_posts()
+        posts = self.control.get_all_web_posts()
         page = self.paginate_queryset(posts)
         serializer = WebPostSerializer(posts, many=True)
         if page is not None:
@@ -104,7 +115,7 @@ class WebPostListView(APIView, PaginationHandlerMixin):
     def post(self, request):
         data = request.data
         data['status'] = "A"
-        post = create_post(data)
+        post = self.control.create_post(data)
         web_post_data = {**request.data, 'post_id': post.pk}
         serializer = WebPostSerializer(data=web_post_data)
         serializer.is_valid(raise_exception=True)
@@ -114,14 +125,15 @@ class WebPostListView(APIView, PaginationHandlerMixin):
 
 class WebPostDetailView(APIView):
     permission_classes = [IsAdminUser]
+    control = PostControl()
 
     def get(self, request, pk):
-        post = get_web_post_by_id(pk)
+        post = self.control.get_web_post_by_id(pk)
         serializer = WebPostSerizlier(post)
         return Response(serializer.data)
 
     def put(self, request, pk):
-        web_post = get_web_post_by_id(pk)
+        web_post = self.control.get_web_post_by_id(pk)
 
         serializer = PostSerializer(web_post.post, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -136,9 +148,10 @@ class WebPostDetailView(APIView):
 class WebPostSearchView(APIView, PaginationHandlerMixin):
     pagination_class = Pagination
     permission_classes = [IsAdminUser]
+    control = PostControl()
 
     def get(self, request):
-        posts = search_web_post(request.query_params.dict())
+        posts = self.control.search_web_post(request.query_params.dict())
         page = self.paginate_queryset(posts)
         serializer = WebPostSerializer(posts, many=True)
         if page is not None:
@@ -151,8 +164,10 @@ class UserPostSearchView(APIView, PaginationHandlerMixin):
     pagination_class = Pagination
     permission_classes = [IsAdminUser]
 
+    control = PostControl()
+
     def get(self, request):
-        posts = search_user_post(request.query_params.dict())
+        posts = self.control.search_user_post(request.query_params.dict())
         page = self.paginate_queryset(posts)
         serializer = UserPostSerializer(posts, many=True)
         if page is not None:
@@ -164,7 +179,6 @@ class UserPostSearchView(APIView, PaginationHandlerMixin):
 class PostClickView(APIView):
     def post(self, request):
         data = {**request.data, 'account_id': request.user.pk}
-        logger.error(data)
         serializer = PostClickSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -174,7 +188,8 @@ class PostClickView(APIView):
 
 @api_view(['GET', ])
 def get_post_image(request, pk):
-    post = get_post_by_id(pk)
+    post_ctl = PostControl()
+    post = post_ctl.get_post_by_id(pk)
     filepath = os.path.join(settings.BASE_DIR, post.user_post.image.path)
     if os.path.exists(filepath):
         filename = os.path.basename(filepath)

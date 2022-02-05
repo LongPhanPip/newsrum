@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Publisher, Feed
 
+from gernes.serializers import GerneSerializer
+
 
 class PublisherSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,7 +24,9 @@ class PublisherSerializer(serializers.ModelSerializer):
 
 class FeedSerializer(serializers.ModelSerializer):
     publisher_id = serializers.IntegerField()
+    gerne = GerneSerializer(read_only=True)
+    gerne_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Feed
-        fields = ['id', 'publisher_id', 'url']
+        fields = ['id', 'publisher_id', 'url', 'gerne', 'gerne_id']

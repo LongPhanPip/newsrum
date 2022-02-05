@@ -10,7 +10,7 @@ import Post from '../../post';
 import Search from '../../search';
 import {UserLayout, UserAccount, UserProfile, UserPosts, UserCreatePost, UserEditPost} from '../../user';
 import {AdminWebPost, AdminPublisherFeed, AdminAddPost, AdminWebSearchPost, AdminSystem, AdminGerne, AdminPublisher,
-AdminUser, AdminUserAccount, AdminUserPost} from '../../admin';
+AdminUser, AdminUserAccount, AdminUserPost, AdminRecommender, AdminTrainRecommender, AdminValidateRecommender} from '../../admin';
 
 function App() {
   return (
@@ -44,7 +44,10 @@ function App() {
             <Route path="add" element={<AdminAddPost />} />
             <Route path="search" element={<AdminWebSearchPost />} />
           </Route>
-          <Route path="recommender"/>
+          <Route path="recommender" element={<AdminRecommender />}>
+            <Route path="train" element={<AdminTrainRecommender />} />
+            <Route path="validate" element={<AdminValidateRecommender />} />
+          </Route>
         </Route>
 
         <Route path="posts/:postId" element={<Post />} />

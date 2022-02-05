@@ -64,8 +64,15 @@ export const get_profile_avatar = (profile) => {
 }
 
 
-export const get_posts = () => {
-  return axios.get(`${USER_URL}${POST_PATH}`, {'headers': authHeader()})
+export const get_posts = (page, keyword, gerne, status, start_at, end_at) => {
+  let params = "";
+  params += `page=${page}`;
+  params += keyword ? `&keyword=${keyword}` : "";
+  params += gerne ? `&gerne_id=${gerne}` : "";
+  params += status ? `&status=${status}` : "";
+  params += start_at ? `&start_at=${start_at}` : "";
+  params += end_at ? `&end_at=${end_at}` : "";
+  return axios.get(`${USER_URL}${POST_PATH}?${params}`, {'headers': authHeader()})
   .then(res => res)
   .catch(error => error.response)
 }

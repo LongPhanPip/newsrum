@@ -17,8 +17,8 @@ class AccountSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = get_user_model().objects.create_user(**validated_data)
-        profile = Profile.objects.create(account=user)
-        profile.save()
+        # profile = Profile.objects.create(account=user)
+        # profile.save()
         user.save()
         return user
 
@@ -39,11 +39,11 @@ class AccountSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Your email format is wrong')
         return value
 
-    def validate_username(self, value):
-        account = Account.objects.filter(username=value)
-        if account.exists():
-            raise serializers.ValidationError('This username is already taken')
-        return value
+    # def validate_username(self, value):
+    #     account = Account.objects.filter(username=value)
+    #     if account.exists():
+    #         raise serializers.ValidationError('This username is already taken')
+    #     return value
 
     def validate_password(self, value):
         try:

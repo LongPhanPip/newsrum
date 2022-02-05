@@ -7,6 +7,7 @@ const FEED_PATH = 'feeds/';
 const POST_PATH = 'posts/';
 const GERNE_PATH = 'gernes/';
 const ACCOUNT_PATH = 'accounts/';
+const REC_PATH = 'recommenders/';
 
 
 export const search_publisher = (keyword) => {
@@ -50,9 +51,13 @@ export const delete_publisher = (id) => {
   .catch(error => error.response)
 }
 
-export const create_feed = (id, url) => {
+export const create_feed = (id, url, gerne) => {
+  let data = {"publisher_id": id, "url": url}
+  if (gerne) {
+    data['gerne_id'] = gerne
+  }
   return axios.post(`${ADMIN_URL}${PUBLISHER_PATH}${id}/feeds`,
-    {"publisher_id": id, "url": url},
+    data,
     {headers: authHeader()})
   .then(res => res)
   .catch(error => error.response)
@@ -213,4 +218,29 @@ export const search_user_post = (page, keyword, gerne, start_at, end_at, status)
   return axios.get(`${ADMIN_URL}${POST_PATH}user/search?${params}`, {headers: authHeader()})
   .then(res => res)
   .catch(error => error.response)
+}
+
+
+export const get_recommenders = () => {
+  return axios.get(`${ADMIN_URL}${REC_PATH}`, {headers: authHeader()})
+  .then(res => res)
+  .catch(error => error.response)
+}
+
+export const create_recommender = (params) => {
+  return axios.post(`${ADMIN_URL}${REC_PATH}`, {'params': params}, {headers: authHeader()})
+  .then(res => res)
+  .catch(error => error.response)
+}
+
+export const use_recommender = (id) => {
+  return axios.post(`${ADMIN_URL}${REC_PATH}use/${id}`, {headers: authHeader()})
+  .then(res => res)
+  .catch(error => error.response)
+}
+
+export const delete_recommender = (id) => {
+  return axios.delete(`${ADMIN_URL}${REC_PATH}${id}`, {headers: authHeader()})
+  .then(res => res)
+  .catch(error => error)
 }

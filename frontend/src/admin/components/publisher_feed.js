@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react';
 import {Container, Row, Col, Form, Button} from 'react-bootstrap';
 
 import {get_publishers, get_feeds_by_publisher, create_feed} from '../services';
+import {get_gernes} from '../../gerne';
 
 import FeedCard from './feed_card';
 
@@ -10,9 +11,12 @@ const AdminPublisherFeed = () => {
   const [publishers, setPublishers] = useState([]);
   const [feeds, setFeeds] = useState([]);
   const [url, setUrl] = useState("");
+  const [gerne, setGerne] = useState('');
+  const [gernes, setGernes] = useState([]);
 
   useEffect(() => {
     get_publishers().then(res => setPublishers(res.data));
+    get_gernes().then(res => setGernes(res.data));
   }, [])
 
   const onChangePublisher = (e) => {
@@ -22,12 +26,15 @@ const AdminPublisherFeed = () => {
 
   const onChangeUrl = (e) => {
     setUrl(e.target.value);
+  }
 
+  const onChangeGerne = (e) => {
+    setGerne(e.target.value)
   }
 
   const onSubmitUrl = (e) => {
     e.preventDefault()
-    create_feed(publisher, url).then(res => {setFeeds(old => [...old, res.data])})
+    create_feed(publisher, url, gerne).then(res => {setFeeds(old => [...old, res.data])})
   }
 
   const onDeleteFeed = (id) => {
@@ -36,6 +43,7 @@ const AdminPublisherFeed = () => {
   }
 
   const list_publishers = publishers.map(publisher => <option key={publisher.id} value={publisher.id}>{publisher.name}</option>)
+  const list_gernes = gernes.map(gerne => <option key={gerne.id} value={gerne.id}>{gerne.name}</option>)
   const list_feeds = feeds.map(feed => <FeedCard key={feed.id} feed={feed} onDelete={onDeleteFeed}/>)
 
   return (
@@ -60,9 +68,15 @@ const AdminPublisherFeed = () => {
                   <Form.Control value={url} onChange={onChangeUrl}>
                   </Form.Control>
                 </Form.Group>
+                <Form.Group className="my-4">
+                  <Form.Select value={gerne} onChange={onChangeGerne}>
+                    <option value="">Chọn thể loại</option>
+                    {list_gernes}
+                  </Form.Select>
+                </Form.Group>
               </Col>
-              <Col className="align-self-end text-end">
-                <Button type="submit">Thêm url</Button>
+              <Col className="align-self-center text-end">
+                <Button variant="outline-primary" type="submit">Thêm url</Button>
               </Col>
             </Row>
           </Form>

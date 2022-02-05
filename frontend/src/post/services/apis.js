@@ -27,12 +27,12 @@ export const get_post_image = (pk) => {
   return `${POST_URL}${pk}/image`;
 }
 
-export const get_hot_posts = (gerne) => {
-  let url = `${POST_URL}hot`
+export const get_recommend_posts = (gerne) => {
+  let url = `${POST_URL}recommend`
   if (gerne) {
     url += `?gerne_id=${gerne}`
   }
-  return axios.get(url)
+  return axios.get(url, {headers: authHeader()})
   .then(res => res)
   .catch(error => error.response)
 }

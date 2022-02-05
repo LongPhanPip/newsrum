@@ -12,76 +12,84 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from permissions import IsPostOwner
 
+from paginations import PaginationHandlerMixin, Pagination
+
 from accounts.serializers import AccountSerializer
-from accounts.controllers import update_account
+from accounts.controls import AccountControl
 
 from profiles.serializers import ProfileSerializer
-from profiles.controllers import get_profile_by_account, update_profile
+from profiles.controls import ProfileControl
 
 from posts.serializers import PostSerializer, UserPostSerializer
-from posts.controllers import get_user_post_by_user, get_user_post_by_id, create_post, create_user_post, delete_post_by_id
+from posts.controls import PostControl
 
-from profiles.controllers import get_profile_by_account
 
 
 class UserAccountView(APIView):
     permission_classes = [IsAuthenticated]
+    control = AccountControl()
 
     def get(self, request):
         serializer = AccountSerializer(request.user)
         return Response(serializer.data)
 
     def put(self, request):
-        return Response(update_account(request.user, request.data).data)
-
+        return Response(self.control.update_account(request.user, request.data).data)
 
     def delete(self, request):
-        delete_account(request.user)
+        self.control.delete_account(request.user)
         return Response('Your account was deleted successfully')
 
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
+    control = ProfileControl()
 
     def get(self, request):
-        profile = get_profile_by_account(request.user)
+        profile = self.control.get_profile_by_account(request.user)
         serializer = ProfileSerializer(profile)
         return Response(serializer.data)
 
     def put(self, request):
-        profile = get_profile_by_account(request.user)
-        return Response(update_profile(profile, request.data).data)
+        profile = self.control.get_profile_by_account(request.user)
+        return Response(self.control.update_profile(profile, request.data).data)
 
 
-class UserPostListView(APIView):
+class UserPostListView(APIView, PaginationHandlerMixin):
+    pagination_class = Pagination
     permission_classes = [IsAuthenticated]
+    control = PostControl()
 
     def get(self, request):
-        posts = get_user_post_by_user(request.user)
+        posts = self.control.get_user_post_by_user(request.user, request.query_params.dict())
         serializer = UserPostSerializer(posts, many=True)
+        page = self.paginate_queryset(posts)
+        if page is not None:
+            serializer = self.get_paginated_response(UserPostSerializer(page, many=True).data)
         return Response(serializer.data)
 
     def post(self, request):
         data = request.data.dict()
         data['status'] = "P"
-        post_serializer = create_post(data)
+        post_serializer = self.control.create_post(data)
         post = post_serializer
 
         user_post_data = {**request.data.dict(), 'post_id': post.pk, 'account_id': request.user.pk}
-        return Response(create_user_post(user_post_data).data, status=status.HTTP_201_CREATED)
+        return Response(self.control.create_user_post(user_post_data).data, status=status.HTTP_201_CREATED)
 
 
 
 class UserPostDetailView(APIView):
     permission_classes = [IsPostOwner]
+    control = PostControl()
 
     def get(self, request, pk):
-        post = get_user_post_by_id(pk)
+        post = self.control.get_user_post_by_id(pk)
         serializer = UserPostSerializer(post)
         return Response(serializer.data)
 
     def put(self, request, pk):
-        user_post = get_user_post_by_id(pk)
+        user_post = self.control.get_user_post_by_id(pk)
 
         serializer = PostSerializer(user_post.post, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -95,10 +103,10 @@ class UserPostDetailView(APIView):
         return Response(serializer.data)
 
     def delete(self, request, pk):
-        user_post = get_user_post_by_id(pk)
+        user_post = self.control.get_user_post_by_id(pk)
         self.check_object_permissions(request, user_post.account)
 
-        delete_post_by_id(pk)
+        self.control.delete_post_by_id(pk)
         return Response('Delete post successful')
 
 

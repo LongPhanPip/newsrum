@@ -13,7 +13,7 @@ const PostCard = (props) => {
 
   const [title, setTitle] = useState(post.title);
   const [description, setDescription] = useState(post.description);
-  const [gerne, setGerne] = useState("");
+  const [gerne, setGerne] = useState(post.gerne.id);
   const [createdAt, setCreatedAt] = useState(post.created_at);
   const [gernes, setGernes] = useState([]);
   const [status, setStatus] = useState(post.status);

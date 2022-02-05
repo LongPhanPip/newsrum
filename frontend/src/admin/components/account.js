@@ -71,7 +71,7 @@ const AdminUserAccount = () => {
 
   const onClickMore = (e) => {
     search_account(page + 1, keyword, startAt, endAt, isAdmin).then(res => {
-      setAccounts(old => [...old, res.data.results])
+      setAccounts(old => [...old, ...res.data.results])
       setDisplayMore(res.data.next ? true: false)
       setPage(page + 1)
     })
@@ -129,7 +129,7 @@ const AdminUserAccount = () => {
       <Row className="justify-content-center">
         {list_account}
       </Row>
-      <div className={`text-center m-2 ${displayMore ? null: "d-none"}`}>
+      <div className={`text-center m-4 ${displayMore ? null: "d-none"}`}>
         <a className="text-decoration-none" onClick={onClickMore}>Hiển thị thêm</a>
       </div>
     </div>

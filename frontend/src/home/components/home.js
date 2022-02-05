@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react'
 import {Container, Col, Row, Button} from 'react-bootstrap';
 
-import {get_posts, get_hot_posts, PostCard} from '../../post';
+import {get_posts, get_recommend_posts, PostCard} from '../../post';
 
 import GerneTab from './gerne_tab';
 import FrontPage from './front_page';
@@ -12,7 +12,7 @@ export const Home = (props) => {
   const [displayMore, setDisplayMore] = useState(true)
 
   useEffect(() => {
-    get_hot_posts().then(res => setFrontPost(res.data));
+    get_recommend_posts().then(res => setFrontPost(res.data));
     get_posts(1).then(res => {
       setPosts(res.data.results)
       res.data.next ? setDisplayMore(true): setDisplayMore(false)

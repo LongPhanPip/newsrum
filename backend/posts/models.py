@@ -25,7 +25,7 @@ class Post(models.Model):
     id = models.UUIDField(default=uuid4, primary_key=True)
     title = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
-    description = models.CharField(max_length=255)
+    description = models.CharField(max_length=1024)
     gerne = models.ForeignKey(Gerne, on_delete=models.CASCADE, related_name="posts")
     status = models.CharField(max_length=32, choices=POST_STATUS)
 
@@ -60,6 +60,7 @@ class PostClick(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="clicks", blank=True, null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="clicks")
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
+    is_recommended = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'post_click'
